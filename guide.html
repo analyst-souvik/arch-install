@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Arch Linux Installation Guide</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+  <div class="container">
+    <h1>Arch Linux Installation Guide</h1>
+    <br>
+    <br>
+<section>
+<p><b>
+> Easy Arch Install Guide
+<br><br>
+A comfy guide to install Arch Linux the Arch way.
+You will never have to use any weird install scripts any more.  
+<br><br>  
+I have used them before and yes, the results were not at all satisfactory. Installing Arch Linux the Arch way is just a feeling you will not get untill you do it the arch way.    
+I guarantee you, I and you will have a working Arch Linux within 15 minutes. (* Provided you have a decent Internet speed.)
+</p>
+</section>
+    <br>
+    <br>
+    <br>
+
+    <section id="download">
+      <h2>Download Arch Linux ISO:</h2>
+      <ul>
+        <li>Download from <a href="https://archlinux.org/download/">Arch Linux website</a>.</li>
+        <li>Make the ISO bootable using <a href="https://www.balena.io/etcher/">balenaEtcher</a>.</li>
+      </ul>
+    </section>
+
+    <br>
+
+    <section id="guide">
+      <h2>Guide Starts Here:</h2>
+      <section id="set-keyboard">
+        <h3>Set Keyboard:</h3>
+        <pre>
+<code>
+loadkeys us <span class="comment"></span></code>
+        </pre>
+      </section>
+
+      <section id="connect-internet">
+        <h3>Connect to Internet:</h3>
+        <h5>Ethernet/USB: Plug and play.</h5>
+        <h5>WiFi:</h5>
+        <pre>
+<code>
+iwctl
+device list
+station wlan0 scan
+station wlan0 get-networks
+station wlan0 connect "network-name"
+Enter Password
+exit</code>
+        </pre>
+      </section>
+      
+<section id="check-connection">
+        <h3>Check Connection:</h3>
+        <pre>
+<code>
+ping 9.9.9.9</code>
+        </pre>
+      </section>
+    </section>
+
+    <br>
+
+    <section id="partition">
+      <h2>Partition Disk:</h2>
+      <section id="identify-disk">
+        <h3>Identify Disk:</h3>
+        <pre>
+<code>
+fdisk -l</code>
+        </pre>
+      </section>
+
+      <section id="start-fdisk">
+        <h3>Start fdisk:</h3>
+        <pre>
+<code>
+fdisk /dev/nvme0n1
+fdisk /dev/sda</code>
+        </pre>
+      </section>
+
+      <section id="fdisk-commands">
+        <h3>Commands:</h3>
+        <pre>
+<code>d: Delete previous partitions.</code>
+<code>g: Create a new GPT disklabel.</code>
+<code>n: Create new partition.</code>
+<code>w: Write changes.</code>
+<code>p: Print changes.</code>
+        </pre>
+      </section>
+
+      <section id="create-partitions">
+        <h3>Create Partitions:</h3>
+        <pre>
+<code>
+/dev/nvme0n1p1: 500 MB (EFI)
+/dev/nvme0n1p2: 2 GB (Swap)
+/dev/nvme0n1p3: Remaining GB (File System)
+/dev/sda1: Remaining GB (File System)</code>
+        </pre>
+      </section>
+    </section>
+
+    <br>
+
+    <section id="format">
+      <h2>Format Partitions:</h2>
+      <section id="efi-partition">
+        <h3>EFI Partition:</h3>
+        <pre>
+<code>mkfs.fat -F 32 /dev/nvme0n1p1</code>
+        </pre>
+      </section>
+
+      <section id="swap-partition">
+        <h3>Swap Partition:</h3>
+        <pre>
+<code>mkswap /dev/nvme0n1p2</code>
+        </pre>
+      </section>
+
+      <section id="file-system">
+        <h3>File System:</h3>
+        <pre>
+<code>
+mkfs.btrfs /dev/nvme0n1p3
+mkfs.btrfs /dev/sda1</code>
+        </pre>
+      </section>
+    </section>
+
+    <br>
+
+    <section id="mount">
+      <h2>Mount Partitions:</h2>
+
+      <section id="mount-file-system">
+        <h3>File System:</h3>
+        <pre>
+<code>
+mount /dev/nvme0n1p3 /mnt
+mount /dev/sda1 /mnt/home</code>
+        </pre>
+      </section>
+    </section>
+
+      <section id="mount-swap">
+        <h3>Swap Partition:</h3>
+        <pre>
+<code>swapon /dev/nvme0n1p2</code>
+        </pre>
+      </section>
+
+      <section id="mount-efi">
+        <h3>EFI Partition:</h3>
+        <pre>
+<code>mkdir -p /mnt/boot/efi &amp; mount /dev/nvme0n1p1 /mnt/boot/efi</code>
+        </pre>
+      </section>
+
+    <section id="genfstab">
+      <h3>Generate fstab:</h3>
+      <pre>
+<code>genfstab /mnt</code>
+      </pre>
+    </section>
+
+    <br>
+
+    <section id="install">
+      <h2>Install Base Packages:</h2>
+      <pre>
+<code>
+pacstrap /mnt base base-devel linux-lts linux-firmware nano sudo networkmanager efibootmgr grub mtools</code>
+      </pre>
+    </section>
+
+    <br>
+
+    <section id="genfstab">
+      <h3>Transfer Fstab Details</h3>
+      <pre>
+<code>genfstab /mnt &gt; /mnt/etc/fstab</code>
+      </pre>
+    </section>
+
+    <section id="change-root">
+      <h3>Change Root:</h3>
+      <pre>
+<code>arch-chroot /mnt</code>
+      </pre>
+    </section>
+
+    <section id="set-timezone">
+      <h3>Set Time Zone:</h3>
+      <pre>
+<code>
+ln -sf /usr/share/zoneinfo/Asia/Kolkata /etc/localtime
+date
+hwclock --systohc</code>
+      </pre>
+    </section>
+
+    <section id="set-locale">
+      <h3>Set Locale:</h3>
+      <pre>
+<code>
+nano /etc/locale.gen
+locale-gen
+nano /etc/locale.conf
+nano /etc/vconsole.conf</code>
+      </pre>
+    </section>
+
+    <section id="set-hostname">
+      <h3>Set Hostname:</h3>
+      <pre>
+<code>nano /etc/hostname</code>
+      </pre>
+    </section>
+
+    <section id="set-root-password">
+      <h3>Set Root Password:</h3>
+      <pre>
+<code>passwd</code>
+      </pre>
+    </section>
+
+    <section id="create-user">
+      <h3>Create User with Sudo Privileges:</h3>
+      <pre>
+<code>
+useradd -m -G wheel -s /bin/bash user
+passwd user</code>
+      </pre>
+    </section>
+
+    <section id="sudo-setup">
+      <h3>Sudo Setup:</h3>
+      <pre>
+<code>
+EDITOR=nano visudo
+Uncomment wheel group.
+su user
+sudo pacman -Syu
+Check functionality and exit</code>
+      </pre>
+    </section>
+
+    <section id="enable-services">
+      <h3>Enable Network Services:</h3>
+      <pre>
+<code>
+nano /etc/hosts
+127.0.0.1   localhost
+::1         localhost 
+
+systemctl enable NetworkManager</code>
+      </pre>
+    </section>
+
+    <section id="install-grub">
+      <h3>Install and Configure GRUB:</h3>
+      <pre>
+<code>
+grub-install --target=x86_64-efi --efi-directory=/boot/efi --bootloader-id=GRUB
+grub-mkconfig -o /boot/grub/grub.cfg
+exit
+umount -a
+reboot</code>
+      </pre>
+    </section>
+
+<br>
+
+    <section id="post-install">
+      <h2>Post Install</h2>
+      <h3>Video Drivers and GUI Installation:</h3>
+      <pre>
+<code>
+Intel: pacman -S xorg xf86-video-intel mesa
+AMD: pacman -S xorg xf86-video-amdgpu mesa
+ATI: pacman -S xorg xf86-video-ati mesa
+NVIDIA: pacman -S xorg xf86-video-nouveau mesa
+</code>
+      </pre>
+    </section>
+
+    <section id="pipewire">
+      <h3>Install Pipewire</h3>
+      <pre>
+<code>
+sudo pacman -S pipewire pipewire-pulse pipewire-media-session
+sudo systemctl enable --now pipewire pipewire-pulse pipewire-media-session
+sudo systemctl --global disable --now alsa-restore alsa-state
+</code>
+      </pre>
+    </section>
+
+<section id="cinnamom">
+      <h3>Installing Cinnamon</h3>
+      <pre>
+<code>
+sudo pacman -S cinnamon nemo-fileroller firefox gnome-terminal
+</code>
+      </pre>
+    </section>
+
+<section id="display-manager">
+      <h3>Display Manager</h3>
+      <pre>
+<code>
+sudo pacman -S lightdm-gtk-greeter lightdm-gtk-greeter-settings
+sudo systemctl enable lightdm
+</code>
+      </pre>
+    </section>
+
+<section id="keyring">
+      <h3>Gnome Keyring</h3>
+      <pre>
+<code>
+sudo pacman -S gnome-keyring
+</code>
+      </pre>
+    </section>
+
+<section id="fonts">
+      <h3>Install some basic fonts</h3>
+      <pre>
+<code>
+sudo pacman -S noto-fonts noto-fonts-cjk noto-fonts-emoji ttf-font-awesome
+</code>
+      </pre>
+    </section>
+
+<section id="packages">
+      <h3>Some Important Packages</h3>
+      <pre>
+<code>
+sudo pacman -S udisks2 udiskie gvfs git gedit flatpak papirus-icon-theme
+</code>
+      </pre>
+    </section>
+
+<section id="video-codecs">
+      <h3>Video Codecs</h3>
+      <pre>
+<code>
+sudo pacman -S a52dec faac faad2 flac jasper lame libdca libdv libmad libmpeg2 libtheora libvorbis libxv wavpack x264 xvidcore
+</code>
+      </pre>
+    </section>
+
+<section id="archive-formats">
+      <h3>Archive Formats</h3>
+      <pre>
+<code>
+sudo pacman -S p7zip unrar tar rsync
+</code>
+      </pre>
+    </section>
+
+<section id="paru">
+      <h2>After Login</h2>
+      <h3>Paru</h3>
+      <pre>
+<code>
+git clone https://aur.archlinux.org/paru-bin.git
+cd paru-bin
+makepkg -si
+</code>
+      </pre>
+    </section>
+
+<section id="paru">
+      <h2>Customization</h2>
+<h4>
+    Nord Color Scheme -
+</h4><h5>
+        Nordic Polar Theme:<br>
+git clone https://github.com/EliverLara/Nordic-Polar.git
+<br><br>
+        Nord Gnome-Terminal:<br>
+git clone https://github.com/arcticicestudio/nord-gnome-terminal.git
+<br><br>
+        Nord Gedit:<br> 
+git clone https://github.com/arcticicestudio/nord-gedit.git
+<br><br>
+        Shell Color Scripts: 
+</h5>
+<pre>
+<code>
+paru -S shell-color-scripts
+sh -c "$(curl -fsSL https://starship.rs/install.sh)"
+
+sudo flatpak override --filesystem=$HOME/.themes
+sudo flatpak override --env=GTK_THEME=Nordic-Polar
+</code></pre>
+</h4>
+    </section>
+
+    <section id="bash">
+      <h3>Adding lines to Bash</h3>
+      <pre>
+<code>
+alias ls='ls -lah --color=auto'
+alias update-grub='sudo grub-mkconfig -o /boot/grub/grub.cfg'
+colorscript -e arch
+eval "$(starship init bash)"
+</code>
+      </pre>
+    </section>
+
+<section id="wallpapers">
+      <h3>Nord Wallpapers</h3>
+      <pre>
+<code>
+paru -S nordic-wallpapers
+</code>
+      </pre>
+    </section>
+
+
+
+  </div>
+</body>
+
+</html>
